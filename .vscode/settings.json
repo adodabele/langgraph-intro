@@ -1,0 +1,6 @@
+{
+    "python-envs.workspaceSearchPaths": ["**/.venv/**"],
+    "python.defaultInterpreterPath": "./.venv/bin/python",
+    "python.terminal.activateEnvironment": true,
+    "python.terminal.activateEnvInCurrentTerminal": true
+}

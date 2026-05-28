@@ -14,7 +14,7 @@ def main():
         agent = Agent(
             name="Scout",
             system_prompt=prompts.scout_system_prompt,
-            model="gpt-4.1-mini-2025-04-14",
+            model="gpt-4o-mini",
             temperature=0.1
         )
 

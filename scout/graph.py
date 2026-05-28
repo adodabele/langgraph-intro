@@ -1,18 +1,95 @@
 from pydantic import BaseModel
 from typing import Annotated, List, Generator
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, AIMessageChunk
+from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage, AIMessage, AIMessageChunk
 from langgraph.graph.message import add_messages
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
 from langgraph.checkpoint.memory import MemorySaver
+from langgraph.checkpoint.memory import InMemorySaver
 from scout.tools import query_db, generate_visualization
 from scout.prompts import prompts
-
 
 class  ScoutState(BaseModel):
     messages: Annotated[List[BaseMessage], add_messages] = []
     chart_json: str = ""
+
+llm = ChatOpenAI(name='Scout', model="gpt-4o-mini")
+# llm.invoke('hi')
+
+from langchain_core.tools import tool
+@tool
+def raise_number_to_the_power_of(a: float, b:float) -> str:
+    """Raise the number a to the power of b"""
+    return a**b
+
+tools = [raise_number_to_the_power_of]
+llm_w_tools = llm.bind_tools(tools)
+
+def assistant_node(state: ScoutState) -> ScoutState:
+    response = llm_w_tools.invoke(state.messages)
+    state.messages.append(response)
+    return state
+
+#### Error
+# def assistant_router(state: ScoutState) -> str:
+#     last_message = state.messages[-1]
+#     if "tool_calls" in last_message:
+#         return "tools"
+#     else:
+#         END
+
+def assistant_router(state: ScoutState) -> str:
+    last_message = state.messages[-1]
+    # Use attribute access and check if the list is not empty
+    if hasattr(last_message, "tool_calls") and last_message.tool_calls:
+        return "tools"
+    return END # Ensure you return the END constant
+
+
+# result = assistant_node(state)
+# print(result.model_dump_json(indent=2))
+
+builder = StateGraph(ScoutState)
+builder.add_node(assistant_node)
+builder.add_node(ToolNode(tools), "tools")
+builder.add_edge(START, "assistant_node")
+builder.add_conditional_edges(
+    "assistant_node",
+    assistant_router,
+    ["tools", END]
+)
+builder.add_edge("tools", "assistant_node")
+memory = InMemorySaver()
+graph = builder.compile(checkpointer=memory)
+
+from IPython.display import display, Image
+display(Image(graph.get_graph(xray=True).draw_mermaid_png()))
+
+config = {"configurable": {"thread_id": "1"}}  # You can use any thread_id string or integer
+
+
+######## conversations ##########
+#1
+state = ScoutState(
+    messages=[HumanMessage(content="hey scout, what is 4.13 raised to the power of 8.16")],
+    chart_json="this is chart json"
+)
+
+result = graph.invoke(input=state,
+                      config=config)
+
+#2
+state = ScoutState(
+    messages=[HumanMessage(content="What did you just raise the power by")],
+    chart_json="this is chart json"
+)
+
+result = graph.invoke(input=state,
+                      config=config,)
+
+
+
 
 
 class Agent:
