@@ -1,37 +1,15 @@
+---
+title: LangGraph Intro
+---
 # LangGraph Intro
 
---------------
-To add code directly to an upstream repository without impacting your origin fork or creating a pull request, you need to push directly to the upstream remote. This requires you to have direct Write/Maintainer permissions on the upstream repository.
-
-1. Navigate to your local repository and verify your current remotes to ensure both origin and upstream are configured correctly:
-git remote -v
-    origin  git@github.com:kenneth-liao/langgraph-intro.git (fetch)
-    origin  git@github.com:kenneth-liao/langgraph-intro.git (push)
-    upstream        git@github.com:adodabele/langgraph-intro.git (fetch)
-    upstream        git@github.com:adodabele/langgraph-intro.git (push)
-2. Fetch the latest changes from the upstream repository to ensure your local branch is up to date:
-    git fetch upstream
-3. Commit your changes locally. Make sure you are working on a dedicated feature branch rather than main or master
-    git checkout -b your-feature-branch
-    git add .
-    git commit -m "Your descriptive commit message"
-4. Push your code directly to upstream by specifying the upstream remote and the target branch:
-    git push upstream your-feature-branch:target-branch
-
 #### Directly work on the upstream main branch without pull request and a seperate branch
-git remote add upstream <URL_TO_UPSTREAM_REPOS_MAIN_REPO>
-git checkout main
-git add .
-git commit -m "Your direct commit message"
-git rebase upstream/main
-git push upstream main
-
-
--------------
-
-
-
-
+git remote add upstream <URL_TO_UPSTREAM_REPOS_MAIN_REPO> \
+git checkout main \
+git add . \
+git commit -m "Your direct commit message" \
+git rebase upstream/main \
+git push upstream main \
 
 This project gives a fundamental introduction to LangGraph by using it to build a simple but powerful data analytics AI agent that can query your database, perform analyses, and generate visualizations. This is an end-to-end, full-deployed AI agent that will teach you core Langgraph concepts so that you can build amazing AI systems yourself. It's meant to be a starting point so add to this example to expand on the agent's capabilities and create your own full-deployed AI agents. Everything covered is free except for usage of the OpenAI API - however feel free to adopt the code to use any provider including local models for free.
 
